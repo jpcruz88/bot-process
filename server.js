@@ -46,32 +46,40 @@ app.get("/", (req, res) => {
         const thumbnailsHTML = imageAndVideoFiles
             .map(
                 (file) => `
-            <li>
-                <a href="/uploads/${file}" download="${file}">
-                    <img src="/uploads/${file}" alt="${file}" width="100">
-                    ${file}
-                </a>
-            </li>
-        `
+            <a href="/uploads/${file}" data-sub-html="<h4>${file}</h4>">
+              <img src="/uploads/${file}" alt="${file}" width="100">
+            </a>
+          `
             )
             .join("");
 
         const html = `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Visualizador de Archivos</title>
-            </head>
-            <body>
-                <h1>Miniaturas de Archivos 123</h1>
-                <ul>
-                    ${thumbnailsHTML}
-                </ul>
-            </body>
-            </html>
-        `;
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Visualizador de Archivos</title>
+            <link
+              rel="stylesheet"
+              href="https://cdn.jsdelivr.net/npm/lightgallery/dist/css/lightgallery.min.css"
+            />
+        </head>
+        <body>
+            <h1>Miniaturas de Archivos</h1>
+            <div id="gallery">
+                ${thumbnailsHTML}
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/lightgallery/dist/js/lightgallery.min.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/lightgallery/dist/js/plugins/zoom.min.js"></script>
+            <script>
+                lightGallery(document.getElementById("gallery"), {
+                    selector: "a",
+                });
+            </script>
+        </body>
+        </html>
+      `;
 
         res.send(html);
     });
