@@ -39,16 +39,18 @@ app.get("/", (req, res) => {
             return;
         }
 
-        // Filtrar archivos de imágenes (puedes agregar más tipos de archivos si es necesario)
-        const imageFiles = files.filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file));
+        // Filtrar archivos de imágenes y videos
+        const imageAndVideoFiles = files.filter((file) => /\.(jpg|jpeg|png|gif|mp4|avi|mkv)$/i.test(file));
 
         // Generar la lista de miniaturas y enlaces de descarga
-        const thumbnailsHTML = imageFiles
+        const thumbnailsHTML = imageAndVideoFiles
             .map(
                 (file) => `
             <li>
-                <img src="/uploads/${file}" alt="${file}" width="100">
-                <a href="/uploads/${file}" download="${file}">Descargar</a>
+                <a href="/uploads/${file}" download="${file}">
+                    <img src="/uploads/${file}" alt="${file}" width="100">
+                    ${file}
+                </a>
             </li>
         `
             )
