@@ -65,7 +65,7 @@ app.get("/", (req, res) => {
                 <title>Visualizador de Archivos</title>
             </head>
             <body>
-                <h1>Miniaturas de Archivos</h1>
+                <h1>Miniaturas de Archivos 123</h1>
                 <ul>
                     ${thumbnailsHTML}
                 </ul>
