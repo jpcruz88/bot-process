@@ -26,6 +26,55 @@ app.post("/upload", upload.array("files", 5), (req, res) => {
     res.send("Archivos subidos con éxito");
 });
 
+// Servir archivos estáticos en la carpeta 'uploads' para visualización
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
+// Endpoint para la página de visualización
+app.get("/", (req, res) => {
+    const uploadDir = path.join(__dirname, "uploads");
+    fs.readdir(uploadDir, (err, files) => {
+        if (err) {
+            console.error("Error al leer la carpeta de uploads:", err);
+            res.status(500).send("Error interno del servidor");
+            return;
+        }
+
+        // Filtrar archivos de imágenes (puedes agregar más tipos de archivos si es necesario)
+        const imageFiles = files.filter((file) => /\.(jpg|jpeg|png|gif)$/i.test(file));
+
+        // Generar la lista de miniaturas y enlaces de descarga
+        const thumbnailsHTML = imageFiles
+            .map(
+                (file) => `
+            <li>
+                <img src="/uploads/${file}" alt="${file}" width="100">
+                <a href="/uploads/${file}" download="${file}">Descargar</a>
+            </li>
+        `
+            )
+            .join("");
+
+        const html = `
+            <!DOCTYPE html>
+            <html lang="en">
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <title>Visualizador de Archivos</title>
+            </head>
+            <body>
+                <h1>Miniaturas de Archivos</h1>
+                <ul>
+                    ${thumbnailsHTML}
+                </ul>
+            </body>
+            </html>
+        `;
+
+        res.send(html);
+    });
+});
+
 app.listen(port, () => {
     console.log(`Servidor escuchando en el puerto ${port}`);
 });
