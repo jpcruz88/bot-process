@@ -4,6 +4,7 @@ const path = require("path");
 const fs = require("fs");
 const app = express();
 const port = process.env.PORT || 3000;
+
 // Configurar almacenamiento
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -20,9 +21,9 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-app.post("/upload", upload.single("file"), (req, res) => {
-    console.log("Archivo recibido:", req.file);
-    res.send("Archivo subido con éxito");
+app.post("/upload", upload.array("files", 5), (req, res) => {
+    console.log("Archivos recibidos:", req.files);
+    res.send("Archivos subidos con éxito");
 });
 
 app.listen(port, () => {
