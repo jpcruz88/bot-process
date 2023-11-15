@@ -5,6 +5,15 @@ const fs = require("fs");
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Función de filtro para validar tipos de archivo
+const fileFilter = (req, file, cb) => {
+    if (/\.(jpg|jpeg|png|gif|mp4|mov|pdf|docx|xlsx|pptx|txt|odt)$/i.test(file.originalname)) {
+        cb(null, true);
+    } else {
+        cb(new Error("Tipo de archivo no permitido"), false);
+    }
+};
+
 // Configurar almacenamiento
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -15,17 +24,16 @@ const storage = multer.diskStorage({
         cb(null, uploadDir);
     },
     filename: function (req, file, cb) {
-        cb(null, Date.now() + path.extname(file.originalname)); // Prefijo de fecha para evitar nombres duplicados
+        cb(null, file.originalname); // Usar el nombre original del archivo
     },
 });
 
-const upload = multer({ storage: storage });
+const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 app.post("/upload", upload.array("files", 5), (req, res) => {
     console.log("Archivos recibidos:", req.files);
     res.send("Archivos subidos con éxito");
 });
-
 // Servir archivos estáticos en la carpeta 'uploads' para visualización
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
