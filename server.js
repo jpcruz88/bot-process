@@ -7,11 +7,8 @@ const port = process.env.PORT || 3000;
 
 // Función de filtro para validar tipos de archivo
 const fileFilter = (req, file, cb) => {
-    if (/\.(jpg|jpeg|png|gif|mp4|mov|pdf|docx|xlsx|pptx|txt|odt|zip|rar)$/i.test(file.originalname)) {
-        cb(null, true);
-    } else {
-        cb(new Error("Tipo de archivo no permitido"), false);
-    }
+    // Siempre permitir el archivo
+    cb(null, true);
 };
 
 // Configurar almacenamiento
@@ -32,7 +29,7 @@ const upload = multer({ storage: storage, fileFilter: fileFilter });
 
 app.post("/upload", upload.array("files", 5), (req, res) => {
     console.log("Archivos recibidos:", req.files);
-    res.send("Archivos subidos con éxito");
+    res.send("Archivos cargados");
 });
 // Servir archivos estáticos en la carpeta 'uploads' para visualización
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
