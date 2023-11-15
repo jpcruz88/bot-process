@@ -7,7 +7,7 @@ const port = process.env.PORT || 3000;
 
 // Función de filtro para validar tipos de archivo
 const fileFilter = (req, file, cb) => {
-    if (/\.(jpg|jpeg|png|gif|mp4|mov|pdf|docx|xlsx|pptx|txt|odt)$/i.test(file.originalname)) {
+    if (/\.(jpg|jpeg|png|gif|mp4|mov|pdf|docx|xlsx|pptx|txt|odt|zip|rar)$/i.test(file.originalname)) {
         cb(null, true);
     } else {
         cb(new Error("Tipo de archivo no permitido"), false);
