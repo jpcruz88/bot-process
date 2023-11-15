@@ -44,19 +44,22 @@ app.get("/", (req, res) => {
             return;
         }
 
-        // Filtrar archivos de imágenes y videos
-        const imageAndVideoFiles = files.filter((file) => /\.(jpg|jpeg|png|gif|mp4|avi|mkv)$/i.test(file));
+        // Función para generar HTML para diferentes tipos de archivos
+        const generateFileHTML = (file) => {
+            const fileExt = path.extname(file).toLowerCase();
+            if (/\.(jpg|jpeg|png|gif)$/.test(fileExt)) {
+                // Imágenes
+                return `<a href="/uploads/${file}" data-sub-html="<h4>${file}</h4>"><img src="/uploads/${file}" alt="${file}" width="100"></a>`;
+            } else if (/\.(mp4|avi|mkv)$/.test(fileExt)) {
+                // Videos
+                return `<a href="/uploads/${file}" data-sub-html="<h4>${file}</h4>"><video width="100" controls><source src="/uploads/${file}" type="video/${fileExt.substr(1)}">Tu navegador no soporta este video.</video></a>`;
+            } else {
+                // Otros archivos (documentos, etc.)
+                return `<a href="/uploads/${file}" download>${file}</a><br>`;
+            }
+        };
 
-        // Generar la lista de miniaturas y enlaces de descarga
-        const thumbnailsHTML = imageAndVideoFiles
-            .map(
-                (file) => `
-            <a href="/uploads/${file}" data-sub-html="<h4>${file}</h4>">
-              <img src="/uploads/${file}" alt="${file}" width="100">
-            </a>
-          `
-            )
-            .join("");
+        const filesHTML = files.map(generateFileHTML).join("");
 
         const html = `
         <!DOCTYPE html>
@@ -64,16 +67,12 @@ app.get("/", (req, res) => {
         <head>
             <meta charset="UTF-8">
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Visualizador de Archivos</title>
-            <link
-              rel="stylesheet"
-              href="https://cdn.jsdelivr.net/npm/lightgallery/dist/css/lightgallery.min.css"
-            />
+            <title>vA</title>
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lightgallery/dist/css/lightgallery.min.css"/>
         </head>
         <body>
-            <h1>Miniaturas de Archivos</h1>
             <div id="gallery">
-                ${thumbnailsHTML}
+                ${filesHTML}
             </div>
             <script src="https://cdn.jsdelivr.net/npm/lightgallery/dist/js/lightgallery.min.js"></script>
             <script src="https://cdn.jsdelivr.net/npm/lightgallery/dist/js/plugins/zoom.min.js"></script>
