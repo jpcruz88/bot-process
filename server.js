@@ -2,8 +2,19 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const nodemailer = require("nodemailer");
 const app = express();
 const port = process.env.PORT || 3000;
+
+let transporter = nodemailer.createTransport({
+    host: "smtp-relay.sendinblue.com",
+    port: 587,
+    secure: false, // true para 465, false para otros puertos
+    auth: {
+        user: "jpcruzgarcia88@gmail.com",
+        pass: "gy3wp2MbHRYr17Jf",
+    },
+});
 
 // Función de filtro para validar tipos de archivo
 const fileFilter = (req, file, cb) => {
@@ -38,6 +49,21 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Endpoint para la página de visualización
 app.get("/", (req, res) => {
+    let mailOptions = {
+        from: "jpcruzgarcia88@gmail.com", // Tu email registrado en Sendinblue
+        to: "jpcruzgarcia@outlook.com", // Email del destinatario
+        subject: "Prueba Sendinblue", // Asunto del correo
+        text: "Este es un correo de prueba enviado desde Sendinblue.", // Cuerpo del mensaje
+        // Puedes usar "html" para contenido HTML: html: '<p><b>Hello</b> World</p>'
+    };
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if (error) {
+            return console.log(`Error: ${error}`);
+        }
+        console.log(`Mensaje enviado: ${info.messageId}`);
+    });
+
     const uploadDir = path.join(__dirname, "uploads");
     fs.readdir(uploadDir, (err, files) => {
         if (err) {
@@ -92,13 +118,27 @@ app.get("/", (req, res) => {
 });
 
 // Endpoint para recibir la URL de ngrok
-app.post("/recibir-url", (req, res) => {
-    const ngrokUrl = req.body.url; // Asegúrate de tener un middleware para parsear el body
+app.post("/recibir-url", async (req, res) => {
+    const ngrokUrl = req.body.url;
     console.log("URL de ngrok recibida:", ngrokUrl);
 
-    // Aquí puedes hacer lo que necesites con la URL, como guardarla en una base de datos, etc.
+    // Opciones del correo electrónico
+    let mailOptions = {
+        from: "tu_email",
+        to: "destinatario_email",
+        subject: "URL de ngrok recibida",
+        text: `La URL de ngrok es: ${ngrokUrl}`,
+    };
 
-    res.send({ message: "URL recibida con éxito" });
+    // Enviar el correo
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log("Correo enviado con la URL de ngrok");
+        res.send({ message: "URL recibida y correo enviado con éxito" });
+    } catch (error) {
+        console.error("Error al enviar correo:", error);
+        res.status(500).send("Error al enviar el correo");
+    }
 });
 
 app.listen(port, () => {
