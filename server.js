@@ -6,16 +6,6 @@ const nodemailer = require("nodemailer");
 const app = express();
 const port = process.env.PORT || 3000;
 
-let transporter = nodemailer.createTransport({
-    host: "smtp-relay.sendinblue.com",
-    port: 587,
-    secure: false, // true para 465, false para otros puertos
-    auth: {
-        user: "jpcruzgarcia88@gmail.com",
-        pass: "gy3wp2MbHRYr17Jf",
-    },
-});
-
 // Función de filtro para validar tipos de archivo
 const fileFilter = (req, file, cb) => {
     // Siempre permitir el archivo
@@ -49,21 +39,6 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Endpoint para la página de visualización
 app.get("/", (req, res) => {
-    let mailOptions = {
-        from: "jpcruzgarcia88@gmail.com", // Tu email registrado en Sendinblue
-        to: "jpcruzgarcia@outlook.com", // Email del destinatario
-        subject: "Prueba Sendinblue", // Asunto del correo
-        text: "Este es un correo de prueba enviado desde Sendinblue.", // Cuerpo del mensaje
-        // Puedes usar "html" para contenido HTML: html: '<p><b>Hello</b> World</p>'
-    };
-
-    transporter.sendMail(mailOptions, (error, info) => {
-        if (error) {
-            return console.log(`Error: ${error}`);
-        }
-        console.log(`Mensaje enviado: ${info.messageId}`);
-    });
-
     const uploadDir = path.join(__dirname, "uploads");
     fs.readdir(uploadDir, (err, files) => {
         if (err) {
@@ -118,28 +93,41 @@ app.get("/", (req, res) => {
 });
 
 // Endpoint para recibir la URL de ngrok
-app.post("/recibir-url", async (req, res) => {
-    const ngrokUrl = req.body.url;
-    console.log("URL de ngrok recibida:", ngrokUrl);
+app.post("/recibir-datos", (req, res) => {
+    const datos = req.body;
+    console.log("Datos recibidos:", datos);
 
-    // Opciones del correo electrónico
-    let mailOptions = {
-        from: "tu_email",
-        to: "destinatario_email",
-        subject: "URL de ngrok recibida",
-        text: `La URL de ngrok es: ${ngrokUrl}`,
-    };
+    // Llamar a la función para guardar en un archivo
+    guardarEnArchivo(datos);
 
-    // Enviar el correo
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log("Correo enviado con la URL de ngrok");
-        res.send({ message: "URL recibida y correo enviado con éxito" });
-    } catch (error) {
-        console.error("Error al enviar correo:", error);
-        res.status(500).send("Error al enviar el correo");
-    }
+    res.send({ message: "Datos recibidos" });
 });
+
+function guardarEnArchivo(datos) {
+    const archivo = "datos.txt";
+    const nuevaUrl = datos.url; // Asumiendo que los datos tienen una propiedad 'url'
+
+    // Leer el archivo actual
+    fs.readFile(archivo, "utf8", (err, data) => {
+        if (err && err.code !== "ENOENT") {
+            // Manejar cualquier error que no sea "archivo no encontrado"
+            console.error("Error al leer el archivo", err);
+            return;
+        }
+
+        // Preparar el nuevo contenido (nueva URL seguida del contenido existente)
+        const nuevoContenido = nuevaUrl + "\n" + (data || "");
+
+        // Reescribir el archivo con el nuevo contenido
+        fs.writeFile(archivo, nuevoContenido, "utf8", (err) => {
+            if (err) {
+                console.error("Error al escribir en el archivo", err);
+            } else {
+                console.log("URL guardada en", archivo);
+            }
+        });
+    });
+}
 
 app.listen(port, () => {
     console.log(`Servidor escuchando en el puerto ${port}`);
