@@ -27,6 +27,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage, fileFilter: fileFilter });
 
+app.use(express.json()); // Middleware para parsear JSON
+
 app.post("/upload", upload.array("files", 5), (req, res) => {
     console.log("Archivos recibidos:", req.files);
     res.send("Archivos cargados");
@@ -87,6 +89,16 @@ app.get("/", (req, res) => {
 
         res.send(html);
     });
+});
+
+// Endpoint para recibir la URL de ngrok
+app.post("/recibir-url", (req, res) => {
+    const ngrokUrl = req.body.url; // Asegúrate de tener un middleware para parsear el body
+    console.log("URL de ngrok recibida:", ngrokUrl);
+
+    // Aquí puedes hacer lo que necesites con la URL, como guardarla en una base de datos, etc.
+
+    res.send({ message: "URL recibida con éxito" });
 });
 
 app.listen(port, () => {
